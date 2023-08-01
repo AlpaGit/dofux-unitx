@@ -1,0 +1,12 @@
+GAF Pro: Flash to Unity3D
+Version 5.2.9
+
+1. Memory leaks fixes;
+2. Sounds feature fixes;
+3. Name parts fixes (instant names);
+4. Fix of strange motion in GAF animation when scaling textures in nesting mode;
+5. Now to unload asset's textures resources you can use the method dropLoadedTexturesReferences() from GAFAnimationAsset class;
+6. Now to call "create prefab", "add to scene" or "prefab+instance" from code you can use proper methods from GAFAnimationAssetInternalEditor class, that located in the namespace GAFEditorInternal.Assets. Namespace GAFEditorInternal is available only in the editor;
+7. Correct animation batching fix for unity 5.5.x;
+8. "Contat Us" changed to "Contact us" (typo fix);
+9. Other bug fixes and optimizations
