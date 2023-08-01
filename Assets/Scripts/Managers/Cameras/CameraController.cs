@@ -67,7 +67,7 @@ namespace Managers.Cameras
             const float targetRatio = gridWidth / gridHeight;
 
             // Adjust the zoom level factor as needed
-            const float zoomLevelFactor = 2.45f;
+            const float zoomLevelFactor = 2.5f;
 
             if (screenRatio >= targetRatio)
             {

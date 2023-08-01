@@ -114,7 +114,7 @@ namespace Components.Maps
             Addressables.ReleaseInstance(gameObject);
             
 
-            GC.Collect();
+            //GC.Collect();
         }
     }
 }
