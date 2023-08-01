@@ -16,7 +16,7 @@ namespace Managers.Maps
         public static MapManager Instance { get; private set; }
         public SceneInstance? CurrentMapScene { get; private set; }
         public Map CurrentMap { get; private set; }
-        
+
         private AsyncOperationHandle<SceneInstance> _currentMapSceneHandle;
 
         public void Awake()
@@ -33,12 +33,14 @@ namespace Managers.Maps
         }
 
         private async UniTask LoadMap(long id)
-        {        
+        {
+            await MapTransitionComponent.Instance.StartTransition();
+
             if (!_currentMapSceneHandle.IsDone)
             {
                 return;
             }
-            
+
             var mapPosition = DatacenterRepository.Instance.GetMapPosition(id);
 
             if (mapPosition == null)
@@ -60,7 +62,7 @@ namespace Managers.Maps
             if (CurrentMapScene != null)
             {
                 await Addressables.UnloadSceneAsync(CurrentMapScene.Value, true);
-                Resources.UnloadUnusedAssets();      
+                Resources.UnloadUnusedAssets();
                 CurrentMapScene = null;
             }
 
@@ -71,38 +73,43 @@ namespace Managers.Maps
             mapComponent = FindObjectOfType<MapComponent>();
             CurrentMap   = new Map(mapComponent.mapInformation, mapPosition);
             GridManager.Instance.UpdateCells(CurrentMap);
+
+            await UniTask.WaitUntil(() => mapComponent.IsLoaded);
+            await UniTask.WaitForFixedUpdate();
+            
+            await MapTransitionComponent.Instance.EndTransition();
             // Instantiate(map);
         }
         // Update is called once per frame
 
-        private async void Update()
+        private void Update()
         {
             if (Input.GetKeyDown(KeyCode.UpArrow))
             {
-                await LoadNextMap(0);
+                LoadNextMap(Direction.North).Forget();
             }
             else if (Input.GetKeyDown(KeyCode.RightArrow))
             {
-                await LoadNextMap(1);
+                LoadNextMap(Direction.East).Forget();
             }
             else if (Input.GetKeyDown(KeyCode.DownArrow))
             {
-                await LoadNextMap(2);
+                LoadNextMap(Direction.South).Forget();
             }
             else if (Input.GetKeyDown(KeyCode.LeftArrow))
             {
-                await LoadNextMap(3);
+                LoadNextMap(Direction.West).Forget();
             }
         }
 
-        private async Task LoadNextMap(int direction)
+        public async UniTask LoadNextMap(Direction direction)
         {
             var scrollAction = DatacenterRepository.Instance.GetMapScrollAction(CurrentMap.Id);
             var nextMapId    = CurrentMap.Id;
 
             switch (direction)
             {
-                case 0:
+                case Direction.North:
                     nextMapId = CurrentMap.BasicInformation.topNeighbourId;
 
                     if (scrollAction is { TopExists: true })
@@ -111,7 +118,7 @@ namespace Managers.Maps
                     }
 
                     break;
-                case 1:
+                case Direction.East:
                     nextMapId = CurrentMap.BasicInformation.rightNeighbourId;
 
                     if (scrollAction is { RightExists: true })
@@ -120,7 +127,7 @@ namespace Managers.Maps
                     }
 
                     break;
-                case 2:
+                case Direction.South:
                     nextMapId = CurrentMap.BasicInformation.bottomNeighbourId;
 
                     if (scrollAction is { BottomExists: true })
@@ -129,7 +136,7 @@ namespace Managers.Maps
                     }
 
                     break;
-                case 3:
+                case Direction.West:
                     nextMapId = CurrentMap.BasicInformation.leftNeighbourId;
 
                     if (scrollAction is { LeftExists: true })

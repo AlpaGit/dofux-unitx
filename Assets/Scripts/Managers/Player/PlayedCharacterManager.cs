@@ -1,4 +1,5 @@
 using System.Linq;
+using Components.Maps;
 using Cysharp.Threading.Tasks;
 using Managers.Maps;
 using Models.Actors;
@@ -13,6 +14,10 @@ namespace Managers.Player
 
         public ActorSprite ActorSprite { get; set; }
         public Direction Orientation { get; set; }
+        
+        private static Texture2D _cursorTexture;
+        private static Vector2 _hotSpot = Vector2.zero; // change this if you want to adjust the 'active' spot of the cursor
+        private static CursorMode _cursorMode = CursorMode.Auto;
 
         void Awake()
         {
@@ -24,12 +29,16 @@ namespace Managers.Player
         
         // Start is called before the first frame update
         async void Start()
-        {
+        {         
+            _cursorTexture = Resources.Load<Texture2D>("Cursors/pointinghand");
+            _hotSpot                = new Vector2(_cursorTexture.width / 2f, _cursorTexture.height / 2f);
+            _cursorMode             = CursorMode.ForceSoftware;
+
             ActorSprite = new ActorSprite(431, "Poutching Ball");
             await ActorSprite.Load("AnimStatique_1");
             ActorSprite.SetCell(327);
         }
-
+        
         private int GetRealOrientation(uint orientation)
         {
             if (orientation == 3)
@@ -93,10 +102,22 @@ namespace Managers.Player
 
         }
         
-        // Update is called once per frame
-        void Update()
+        public void SetHandCursor()
         {
+            Cursor.SetCursor(_cursorTexture, _hotSpot, _cursorMode);
+        }
         
+        public void SetDefaultCursor()
+        {
+            Cursor.SetCursor(null, Vector2.zero, _cursorMode);
+        }
+
+        public async UniTask MoveToBorder(Direction direction)
+        {
+            // we need to get the closest cell to the cursor and that is on the border
+            
+            // and then we change map
+            MapManager.Instance.LoadNextMap(direction).Forget();
         }
     }
 }

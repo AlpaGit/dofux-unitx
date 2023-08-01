@@ -20,9 +20,14 @@ namespace Components.Maps
         private AsyncOperationHandle<IList<Texture2D>> _handle;
         private AsyncOperationHandle<Shader> _shaderHandle;
 
+        public bool IsLoaded
+        {
+            get;
+            private set;
+        }
+        
         private async void Start()
         {
-            
             _shaderHandle = Addressables.LoadAssetAsync<Shader>("Shaders/ColorMatrixShader.shader");
             var colorMatrixShader = await _shaderHandle;
             // var colorMatrixShader = Shader.Find("Custom/ColorMatrixShader");
@@ -83,6 +88,7 @@ namespace Components.Maps
                 }
             }
 
+            IsLoaded = true;
             if (Camera.main == null)
             {
                 return;

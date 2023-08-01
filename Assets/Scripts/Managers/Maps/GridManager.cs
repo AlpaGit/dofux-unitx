@@ -15,16 +15,10 @@ namespace Managers.Maps
         
         private readonly List<GameObject> _cells = new(560);
     
-        private static Texture2D _cursorTexture;
-        private static Vector2 _hotSpot = Vector2.zero; // change this if you want to adjust the 'active' spot of the cursor
-        private static CursorMode _cursorMode = CursorMode.Auto;
 
         // Start is called before the first frame update
         void Start()
         {       
-            _cursorTexture = Resources.Load<Texture2D>("Cursors/pointinghand");
-            _hotSpot       = new Vector2(_cursorTexture.width / 2f, _cursorTexture.height / 2f);
-            _cursorMode    = CursorMode.ForceSoftware;
         }
 
         private void Awake()
@@ -127,36 +121,6 @@ namespace Managers.Maps
         }
 
         // Update is called once per frame
-        async void Update()
-        {
-            var mousePosition = Camera.main!.ScreenToWorldPoint(Input.mousePosition);
 
-            var hit = Physics2D.Raycast(mousePosition, Vector2.zero);
-
-            if (hit.collider == null)
-            {
-                Cursor.SetCursor(null, Vector2.zero, _cursorMode);
-                Debug.Log("No collider hit");
-                return;
-            }
-
-            // A collider was hit by the raycast
-            var cellComponent = hit.collider.GetComponent<CellComponent>();
-            if (cellComponent == null)
-            {
-                Cursor.SetCursor(null, Vector2.zero, _cursorMode);
-                Debug.Log("No cell component found");
-                return;
-            }
-
-            Cursor.SetCursor(_cursorTexture, _hotSpot, _cursorMode);
-
-            if (Input.GetMouseButtonDown(0)) // 0 is the left mouse button
-            {
-                // The clicked object has a CellComponent, so it's a cell
-                Debug.Log("Cell clicked: " + cellComponent.CellId);
-                await PlayedCharacterManager.Instance.Move(cellComponent.CellId);
-            }
-        }
     }
 }
